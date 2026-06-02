@@ -9,8 +9,9 @@ build/
 # Pytest
 .pytest_cache/
 
-# Tutorial data — large downloaded files, not committed
+# Tutorial data — large downloaded/generated files, not committed
 tutorials/data/*.nc
+tutorials/data/*.npy
 tutorials/data/*.tif
 tutorials/data/*.yaml
 
