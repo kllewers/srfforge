@@ -20,7 +20,19 @@ from ..instruments.aviris3 import AVIRIS3, _data_group
 #   https://github.com/EnSpec/hytools/blob/master/hytools/io/netcdf.py
 # ---------------------------------------------------------------------------
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: io/aviris3.py  —  AVIRIS-3 NetCDF4 file reader
+#
+#   called by ◄── user code
+#   calls     ──► instruments/aviris3.py::_data_group
+#                 instruments/aviris3.py::AVIRIS3  (to build instrument object)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code
+# Calls:     _data_group (instruments/aviris3.py), AVIRIS3 (instruments/aviris3.py)
+#--------------------------------------
 def read_aviris3_nc(filepath: str | Path) -> tuple[np.ndarray, AVIRIS3, dict]:
     """
     Read an AVIRIS-3 L1B or L2A NetCDF4 product file.

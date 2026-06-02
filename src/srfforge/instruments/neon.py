@@ -20,7 +20,18 @@ from .base import Instrument
 #   https://github.com/EnSpec/hytools/blob/master/hytools/io/neon.py
 # ---------------------------------------------------------------------------
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: instruments/neon.py  —  NEON AOP instrument
+#
+#   called by ◄── user code / read_neon_h5 (io/hdf5.py) / read_neon_envi (io/envi.py)
+#   calls     ──► _read_spectral_from_h5 (when h5_file is given)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code, read_neon_h5 (io/hdf5.py), read_neon_envi (io/envi.py)
+# Calls:     _read_spectral_from_h5 (when h5_file provided)
+#--------------------------------------
 class NEON(Instrument):
     """
     NEON AOP (Airborne Observation Platform) hyperspectral instrument.
@@ -33,6 +44,10 @@ class NEON(Instrument):
               FWHM are read from the file and the wavelengths/fwhm params are ignored.
     """
 
+    #--------------------------------------
+    # Called by: user code, read_neon_h5 (io/hdf5.py), read_neon_envi (io/envi.py)
+    # Calls:     _read_spectral_from_h5 (when h5_file provided)
+    #--------------------------------------
     def __init__(
         self,
         wavelengths: np.ndarray | None = None,
@@ -51,15 +66,27 @@ class NEON(Instrument):
         else:
             raise ValueError("Provide either 'h5_file' or 'wavelengths'.")
 
+    #--------------------------------------
+    # Called by: BandConvolver.__init__ (convolve.py)
+    # Calls:     none
+    #--------------------------------------
     @property
     def wavelengths(self) -> np.ndarray:
         return self._wavelengths
 
+    #--------------------------------------
+    # Called by: BandConvolver.__init__ (convolve.py)
+    # Calls:     none
+    #--------------------------------------
     @property
     def fwhm(self) -> np.ndarray:
         return self._fwhm
 
 
+#--------------------------------------
+# Called by: NEON.__init__
+# Calls:     none  (h5py)
+#--------------------------------------
 def _read_spectral_from_h5(filepath: str | Path) -> tuple[np.ndarray, np.ndarray]:
     try:
         import h5py  # type: ignore

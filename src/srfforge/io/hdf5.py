@@ -2,7 +2,18 @@ from pathlib import Path
 import numpy as np
 from ..instruments.neon import NEON
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: io/hdf5.py  —  NEON HDF5 file reader
+#
+#   called by ◄── user code
+#   calls     ──► instruments/neon.py::NEON  (to build instrument object)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code
+# Calls:     NEON (instruments/neon.py)
+#--------------------------------------
 def read_neon_h5(filepath: str | Path) -> tuple[np.ndarray, NEON, dict]:
     """
     Read a NEON AOP reflectance HDF5 file.

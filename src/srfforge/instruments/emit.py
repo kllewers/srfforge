@@ -21,7 +21,18 @@ _DEFAULT_WL_FILE = _DATA_DIR / "EMIT_Wavelengths_20250721.txt"
 # instead of the bundled nominal values.
 # ---------------------------------------------------------------------------
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: instruments/emit.py  —  EMIT instrument
+#
+#   called by ◄── user code / BandConvolver (via .wavelengths / .fwhm)
+#   calls     ──► _load_wavelengths_txt, _load_wavelengths_netcdf
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code
+# Calls:     _load_wavelengths_txt or _load_wavelengths_netcdf
+#--------------------------------------
 class EMIT(Instrument):
     """
     EMIT (Earth Surface Mineral Dust Source Investigation) instrument.
@@ -34,6 +45,10 @@ class EMIT(Instrument):
         If None, uses the bundled nominal wavelengths from emit-sds-l1b (2025-07-21).
     """
 
+    #--------------------------------------
+    # Called by: user code
+    # Calls:     _load_wavelengths_txt or _load_wavelengths_netcdf
+    #--------------------------------------
     def __init__(self, srf_file: str | None = None) -> None:
         if srf_file is None:
             self._wavelengths, self._fwhm = _load_wavelengths_txt(_DEFAULT_WL_FILE)
@@ -44,15 +59,27 @@ class EMIT(Instrument):
             else:
                 self._wavelengths, self._fwhm = _load_wavelengths_txt(path)
 
+    #--------------------------------------
+    # Called by: BandConvolver.__init__ (convolve.py)
+    # Calls:     none
+    #--------------------------------------
     @property
     def wavelengths(self) -> np.ndarray:
         return self._wavelengths
 
+    #--------------------------------------
+    # Called by: BandConvolver.__init__ (convolve.py)
+    # Calls:     none
+    #--------------------------------------
     @property
     def fwhm(self) -> np.ndarray:
         return self._fwhm
 
 
+#--------------------------------------
+# Called by: EMIT.__init__
+# Calls:     none
+#--------------------------------------
 def _load_wavelengths_txt(path: Path) -> tuple[np.ndarray, np.ndarray]:
     """Parse emit-sds-l1b wavelength file: columns are band_idx, wl_um, fwhm_um.
     Source: https://github.com/emit-sds/emit-sds-l1b/tree/main/data/emit
@@ -66,6 +93,10 @@ def _load_wavelengths_txt(path: Path) -> tuple[np.ndarray, np.ndarray]:
     return wl_nm[order], fwhm_nm[order]
 
 
+#--------------------------------------
+# Called by: EMIT.__init__
+# Calls:     none  (h5py)
+#--------------------------------------
 def _load_wavelengths_netcdf(path: Path) -> tuple[np.ndarray, np.ndarray]:
     """Extract wavelengths and FWHM from an EMIT NetCDF4 product file.
 

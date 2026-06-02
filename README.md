@@ -88,14 +88,90 @@ pytest
 
 ```
 src/srfforge/
-├── convolve.py          # BandConvolver
-├── srf.py               # Gaussian SRF math
+├── __init__.py          # public API: BandConvolver, NEON, EMIT, AVIRIS3
+├── convolve.py          # BandConvolver class
+├── srf.py               # Gaussian SRF math (build_convolution_matrix)
 ├── instruments/
-│   ├── base.py          # abstract Instrument
-│   ├── emit.py          # EMIT
-│   └── neon.py          # NEON
+│   ├── __init__.py      # re-exports NEON, EMIT, AVIRIS3
+│   ├── base.py          # abstract Instrument base class
+│   ├── emit.py          # EMIT instrument (bundled or file-based wavelengths)
+│   ├── neon.py          # NEON instrument (array or HDF5 file)
+│   └── aviris3.py       # AVIRIS-3 instrument (array or NetCDF4 file)
 ├── io/
-│   └── hdf5.py          # read_neon_h5
+│   ├── __init__.py      # re-exports read_neon_h5, read_neon_envi, read_aviris3_nc
+│   ├── hdf5.py          # read_neon_h5   — reads NEON .h5 reflectance tile
+│   ├── envi.py          # read_neon_envi — reads NEON ENVI .hdr/.bin file
+│   └── aviris3.py       # read_aviris3_nc — reads AVIRIS-3 L1B/L2A .nc file
 └── data/
-    └── EMIT_Wavelengths_20250721.txt
+    └── EMIT_Wavelengths_20250721.txt   # bundled EMIT spectral calibration
+```
+
+## Module call graph
+
+```
+User code
+    │
+    ▼
+srfforge/__init__.py  ──exports──►  BandConvolver, NEON, EMIT, AVIRIS3
+srfforge/io/__init__.py  ────────►  read_neon_h5, read_neon_envi, read_aviris3_nc
+
+─────────────────────────────────────────────────────────────────────────────
+Instrument hierarchy
+─────────────────────────────────────────────────────────────────────────────
+
+             instruments/base.py
+                  Instrument  (abstract: .wavelengths, .fwhm)
+                  ▲     ▲     ▲
+                  │     │     │
+            neon.py  emit.py  aviris3.py
+              NEON    EMIT    AVIRIS3
+
+─────────────────────────────────────────────────────────────────────────────
+Instrument initialization
+─────────────────────────────────────────────────────────────────────────────
+
+EMIT(srf_file=None)
+  ├─ srf_file=None  ──► _load_wavelengths_txt(bundled .txt)
+  ├─ srf_file=".nc" ──► _load_wavelengths_netcdf()  [h5py]
+  └─ srf_file=".txt"──► _load_wavelengths_txt()
+
+NEON(wavelengths=..., fwhm=...)     ← arrays passed directly
+NEON(h5_file="...")  ──────────────► _read_spectral_from_h5()  [h5py]
+
+AVIRIS3(wavelengths=..., fwhm=...)  ← arrays passed directly
+AVIRIS3(nc_file="...")  ───────────► _read_spectral_from_nc()
+                                          └──► _data_group()
+                                               (detects 'radiance' | 'reflectance')
+
+─────────────────────────────────────────────────────────────────────────────
+Convolution
+─────────────────────────────────────────────────────────────────────────────
+
+BandConvolver(source, target)
+  │
+  ├─ __init__  ──► srf.py::build_convolution_matrix(
+  │                    source.wavelengths, target.wavelengths, target.fwhm
+  │                )  →  M  shape (n_target, n_source)
+  │
+  └─ __call__(reflectance)  ──►  reflectance @ M.T
+                                 shape (..., n_target_bands)
+
+─────────────────────────────────────────────────────────────────────────────
+IO readers  (file → array + Instrument + metadata)
+─────────────────────────────────────────────────────────────────────────────
+
+io/hdf5.py::read_neon_h5(path)
+  │  h5py reads:  /{site}/Reflectance/Metadata/Spectral_Data/{Wavelength,FWHM}
+  │               /{site}/Reflectance/Reflectance_Data  (rows×cols×bands)
+  └─ returns ──►  (reflectance ndarray, NEON(wavelengths, fwhm), metadata dict)
+
+io/envi.py::read_neon_envi(hdr_file)
+  │  spectral reads: ENVI .hdr + binary sidecar
+  └─ returns ──►  (reflectance ndarray, NEON(wavelengths, fwhm), metadata dict)
+
+io/aviris3.py::read_aviris3_nc(path)
+  │  h5py reads:  /{radiance|reflectance}/{wavelength,fwhm,data_cube}
+  │               calls instruments/aviris3.py::_data_group()
+  └─ returns ──►  (data ndarray, AVIRIS3(wavelengths, fwhm), metadata dict)
+                  data transposed: (bands,lines,cols) → (lines,cols,bands)
 ```

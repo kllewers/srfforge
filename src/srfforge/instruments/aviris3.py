@@ -19,7 +19,18 @@ from .base import Instrument
 #   https://github.com/EnSpec/hytools/blob/master/hytools/io/netcdf.py
 # ---------------------------------------------------------------------------
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: instruments/aviris3.py  —  AVIRIS-3 instrument
+#
+#   called by ◄── user code / read_aviris3_nc (io/aviris3.py)
+#   calls     ──► _read_spectral_from_nc (when nc_file is given)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code, read_aviris3_nc (io/aviris3.py)
+# Calls:     _read_spectral_from_nc (when nc_file provided)
+#--------------------------------------
 class AVIRIS3(Instrument):
     """
     AVIRIS-3 (Airborne Visible/InfraRed Imaging Spectrometer, 3rd generation).
@@ -35,6 +46,10 @@ class AVIRIS3(Instrument):
               wavelengths and FWHM are read from the file.
     """
 
+    #--------------------------------------
+    # Called by: user code, read_aviris3_nc (io/aviris3.py)
+    # Calls:     _read_spectral_from_nc (when nc_file provided)
+    #--------------------------------------
     def __init__(
         self,
         wavelengths: np.ndarray | None = None,
@@ -53,15 +68,27 @@ class AVIRIS3(Instrument):
         else:
             raise ValueError("Provide either 'nc_file' or 'wavelengths'.")
 
+    #--------------------------------------
+    # Called by: BandConvolver.__init__ (convolve.py)
+    # Calls:     none
+    #--------------------------------------
     @property
     def wavelengths(self) -> np.ndarray:
         return self._wavelengths
 
+    #--------------------------------------
+    # Called by: BandConvolver.__init__ (convolve.py)
+    # Calls:     none
+    #--------------------------------------
     @property
     def fwhm(self) -> np.ndarray:
         return self._fwhm
 
 
+#--------------------------------------
+# Called by: AVIRIS3.__init__
+# Calls:     _data_group
+#--------------------------------------
 def _read_spectral_from_nc(filepath: str | Path) -> tuple[np.ndarray, np.ndarray]:
     """Read wavelengths and FWHM from an AVIRIS-3 NetCDF4 product file.
 
@@ -86,6 +113,10 @@ def _read_spectral_from_nc(filepath: str | Path) -> tuple[np.ndarray, np.ndarray
     return wl[order], fwhm[order]
 
 
+#--------------------------------------
+# Called by: _read_spectral_from_nc, read_aviris3_nc (io/aviris3.py)
+# Calls:     none
+#--------------------------------------
 def _data_group(f) -> str:
     """Return the name of the top-level data group ('radiance' or 'reflectance')."""
     for name in ("radiance", "reflectance"):

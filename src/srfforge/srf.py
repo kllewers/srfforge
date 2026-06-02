@@ -1,6 +1,17 @@
 import numpy as np
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: srf.py  —  Gaussian spectral response function math
+#
+#   called by ◄── BandConvolver.__init__  (convolve.py)
+#   calls     ──► (none — pure numpy)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: BandConvolver.__init__ (convolve.py)
+# Calls:     none
+#--------------------------------------
 def build_convolution_matrix(
     source_wl: np.ndarray,
     target_wl: np.ndarray,

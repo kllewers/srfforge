@@ -4,7 +4,18 @@ import numpy as np
 from .instruments.base import Instrument
 from .srf import build_convolution_matrix
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: convolve.py  —  BandConvolver class
+#
+#   called by ◄── user code
+#   calls     ──► srf.py::build_convolution_matrix  (in __init__)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code
+# Calls:     build_convolution_matrix (srf.py)
+#--------------------------------------
 class BandConvolver:
     """
     Convolve reflectance data from one instrument's spectral sampling to another's.
@@ -40,6 +51,10 @@ class BandConvolver:
         emit_refl = convolve(refl)
     """
 
+    #--------------------------------------
+    # Called by: user code
+    # Calls:     build_convolution_matrix (srf.py)
+    #--------------------------------------
     def __init__(self, source: Instrument, target: Instrument) -> None:
         self.source = source
         self.target = target
@@ -47,11 +62,19 @@ class BandConvolver:
             source.wavelengths, target.wavelengths, target.fwhm
         )
 
+    #--------------------------------------
+    # Called by: user code (optional inspection)
+    # Calls:     none
+    #--------------------------------------
     @property
     def matrix(self) -> np.ndarray:
         """Convolution matrix of shape (n_target_bands, n_source_bands)."""
         return self._matrix
 
+    #--------------------------------------
+    # Called by: user code  (conv(reflectance))
+    # Calls:     none  (numpy matmul)
+    #--------------------------------------
     def __call__(self, reflectance: np.ndarray) -> np.ndarray:
         """
         Convolve reflectance to target instrument bands.
@@ -66,6 +89,10 @@ class BandConvolver:
         """
         return reflectance @ self._matrix.T
 
+    #--------------------------------------
+    # Called by: Python repr() / print()
+    # Calls:     none
+    #--------------------------------------
     def __repr__(self) -> str:
         return (
             f"BandConvolver(\n"

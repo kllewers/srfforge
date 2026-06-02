@@ -2,7 +2,19 @@ from pathlib import Path
 import numpy as np
 from ..instruments.neon import NEON
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Module: io/envi.py  —  NEON ENVI file reader
+#
+#   called by ◄── user code
+#   calls     ──► instruments/neon.py::NEON  (to build instrument object)
+#                 _parse_scale (local helper)
+# ─────────────────────────────────────────────────────────────────────────────
 
+
+#--------------------------------------
+# Called by: user code
+# Calls:     NEON (instruments/neon.py), _parse_scale
+#--------------------------------------
 def read_neon_envi(hdr_file: str | Path) -> tuple[np.ndarray, NEON, dict]:
     """
     Read a NEON AOP reflectance ENVI file.
@@ -54,6 +66,10 @@ def read_neon_envi(hdr_file: str | Path) -> tuple[np.ndarray, NEON, dict]:
     return refl, neon, metadata
 
 
+#--------------------------------------
+# Called by: read_neon_envi
+# Calls:     none
+#--------------------------------------
 def _parse_scale(meta: dict) -> float:
     """Extract scale factor from ENVI header metadata."""
     for key in ("reflectance scale factor", "scale factor", "scalefactor"):
