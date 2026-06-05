@@ -7,14 +7,47 @@ Currently supports convolving **NEON AOP** data to **EMIT** spectral sampling. T
 ## Installation
 
 ```bash
+# Core (band convolution only)
+pip install -e "."
+
+# With EarthData search (find co-located NEON + EMIT granules)
+pip install -e ".[search]"
+
+# With plotting helpers
+pip install -e ".[plot]"
+
+# Everything
+pip install -e ".[full]"
+
+# Development
 pip install -e ".[dev]"
 ```
 
-**Dependencies:** `numpy`, `scipy`, `h5py`
+**Core dependencies:** `numpy`, `h5py`
+**Search extras:** `earthaccess`, `neonutilities`, `shapely`, `pyproj`
+**Plot extras:** `matplotlib`
 
-To read EMIT NetCDF4 product files directly, also install `netCDF4`:
-```bash
-pip install netCDF4
+## Find co-located NEON + EMIT data and convolve
+
+```python
+from srfforge.search import find_overlapping
+from srfforge.io import read_neon_h5
+from srfforge import BandConvolver, EMIT
+from srfforge.plot import compare_spectra, rgb_quicklook
+
+# 1. Find overlapping granules (requires pip install 'srfforge[search]')
+pairs = find_overlapping(site="NIWO", year=2023, max_cloud=30)
+print(f"Found {len(pairs)} NEON tile / EMIT granule pairs")
+
+# 2. Read NEON tile
+refl, neon, meta = read_neon_h5("NEON_D13_NIWO_DP3_454000_4431000_reflectance.h5")
+
+# 3. Convolve to EMIT spectral sampling
+emit_refl = BandConvolver(source=neon, target=EMIT())(refl)
+
+# 4. Plot (requires pip install 'srfforge[plot]')
+compare_spectra(refl, emit_refl, source=neon, target=EMIT())
+rgb_quicklook(refl, instrument=neon)
 ```
 
 ## Quick start
@@ -99,9 +132,16 @@ src/srfforge/
 │   └── aviris3.py       # AVIRIS-3 instrument (array or NetCDF4 file)
 ├── io/
 │   ├── __init__.py      # re-exports read_neon_h5, read_neon_envi, read_aviris3_nc
-│   ├── hdf5.py          # read_neon_h5   — reads NEON .h5 reflectance tile
+│   ├── hdf5.py          # read_neon_h5   — reads NEON .h5 reflectance tile + spatial metadata
 │   ├── envi.py          # read_neon_envi — reads NEON ENVI .hdr/.bin file
 │   └── aviris3.py       # read_aviris3_nc — reads AVIRIS-3 L1B/L2A .nc file
+├── search/              # [search] extra — EarthData colocation
+│   ├── __init__.py      # find_overlapping(site, year) → list[OverlapResult]
+│   ├── _emit.py         # search_emit_granules via earthaccess
+│   └── _neon.py         # get_neon_tile_bounds via neonutilities + pyproj
+├── plot/                # [plot] extra — visualization helpers
+│   ├── __init__.py      # compare_spectra, rgb_quicklook, plot_residuals
+│   └── core.py          # matplotlib implementations
 └── data/
     └── EMIT_Wavelengths_20250721.txt   # bundled EMIT spectral calibration
 ```
