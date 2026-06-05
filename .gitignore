@@ -10,14 +10,7 @@ build/
 .pytest_cache/
 
 # Tutorial data — large downloaded/generated files, not committed
-tutorials/data/*.nc
-tutorials/data/*.npy
-tutorials/data/*.tif
-tutorials/data/*.yaml
 tutorials/data/
-
-# Generated figures are reproducible from the notebook
-tutorials/data/*.png
 
 # Jupyter
 .ipynb_checkpoints/
