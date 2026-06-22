@@ -18,6 +18,10 @@ dependencies:
   # Plot extras
   - matplotlib>=3.5
 
+  # EMIT / NetCDF4 reading
+  - netcdf4>=1.6        # xarray engine for EMIT L2A files
+  - xarray>=2023.1
+
   # Tutorials
   - jupyter
   - jupyterlab
