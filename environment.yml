@@ -22,6 +22,9 @@ dependencies:
   - netcdf4>=1.6        # xarray engine for EMIT L2A files
   - xarray>=2023.1
 
+  # ENVI hyperspectral file reading (G-LiHT, AVIRIS, NEON ENVI exports)
+  - spectral>=0.23
+
   # Tutorials
   - jupyter
   - jupyterlab

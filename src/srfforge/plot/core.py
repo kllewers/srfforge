@@ -114,6 +114,7 @@ def rgb_quicklook(
     instrument: "Instrument",
     rgb_nm: tuple[float, float, float] = (640.0, 550.0, 460.0),
     percentile: tuple[float, float] = (2.0, 98.0),
+    aspect: str = "equal",
     ax=None,
 ) -> "plt.Figure":
     """
@@ -145,7 +146,7 @@ def rgb_quicklook(
     rgb = np.where(np.isnan(rgb), 1.0, rgb)
 
     fig, ax_out = (ax.figure, ax) if ax is not None else plt.subplots(figsize=(6, 6))
-    ax_out.imshow(rgb)
+    ax_out.imshow(rgb, aspect=aspect)
     ax_out.set_title(
         f"{type(instrument).__name__} RGB  "
         f"({rgb_nm[0]:.0f} / {rgb_nm[1]:.0f} / {rgb_nm[2]:.0f} nm)"
